@@ -1,26 +1,48 @@
 (ns main.core
-  (:require ["three" :as THREE]))
+  (:require [terrain.scene :as tscene]))
 
+;; Global app state that survives hot reloads
+(defonce state (atom nil))
+
+;; Handle browser window resizing
+(defn resize! []
+  (when-let [{:keys [renderer ^js camera]} @state]
+    (let [w js/window.innerWidth
+          h js/window.innerHeight]
+      (set! (.-aspect camera) (/ w h))
+      (.updateProjectionMatrix camera)
+      (.setSize renderer w h))))
+
+;; Animation loop
+(defn animate []
+  (when-let [{:keys [renderer scene ^js camera]} @state]
+    (.render renderer scene camera)
+    (js/requestAnimationFrame animate)))
+
+;; App initialization
 (defn init []
   (let [canvas (.getElementById js/document "app")
-        renderer (THREE/WebGLRenderer. #js {:canvas canvas})
-        scene (THREE/Scene.)
-        camera (THREE/PerspectiveCamera. 75
-                                         (/ js/window.innerWidth js/window.innerHeight)
-                                         0.1
-                                         1000)
-        geometry (THREE/BoxGeometry.)
-        material (THREE/MeshBasicMaterial. #js {:color 0x00ff00})
-        cube (THREE/Mesh. geometry material)]
+        renderer (tscene/create-renderer canvas)
+        camera (tscene/create-camera)
+        scene (tscene/create-scene)
+        terrain (tscene/create-terrain)]
 
-    (.setSize renderer js/window.innerWidth js/window.innerHeight)
-    (.add scene cube)
-    (set! (.-z camera.position) 5)
+    (.add scene terrain)
 
-    (defn animate []
-      (js/requestAnimationFrame animate)
-      (set! (.-x cube.rotation) (+ (.-x cube.rotation) 0.01))
-      (set! (.-y cube.rotation) (+ (.-y cube.rotation) 0.01))
-      (.render renderer scene camera))
+    ;; Store everything in global state
+    (reset! state {:renderer renderer
+                   :camera   camera
+                   :scene    scene
+                   :terrain  terrain})
 
-    (animate)))
+    ;; Initial resize + start animation
+    (resize!)
+    (js/requestAnimationFrame animate)
+
+    ;; Listen for window resizes
+    (.addEventListener js/window "resize" resize!)))
+
+;; Entry point for shadow-cljs
+(defn ^:export main []
+  (when-not @state
+    (init)))

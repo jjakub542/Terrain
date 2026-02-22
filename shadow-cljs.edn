@@ -7,7 +7,7 @@
   {:target :browser
    :output-dir "public/js"
    :asset-path "/js"
-   :modules {:main {:init-fn main.core/init}}
+   :modules {:main {:init-fn main.core/main}}
    :devtools {:http-root "public"
               :http-port 8080
               :autoload true}}}}
