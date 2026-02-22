@@ -1,0 +1,38 @@
+### Clojure / ClojureScript ###
+.clj-kondo/
+.cpcache/
+cljs-runtime/
+out/
+target/
+
+### shadow-cljs ###
+.shadow-cljs/
+public/js/
+public/js/*
+
+### Node ###
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+pnpm-lock.yaml
+
+### Java ###
+*.class
+*.jar
+*.war
+*.ear
+
+### Editor / OS ###
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
+
+### REPL ###
+.nrepl-port
